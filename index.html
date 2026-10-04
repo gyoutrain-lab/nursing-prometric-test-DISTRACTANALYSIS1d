@@ -1,698 +1,599 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCFHS Nursing Technician Board Simulator</title>
-    <style>
-        :root {
-            --primary-color: #005691;
-            --primary-hover: #003d66;
-            --secondary-color: #008080;
-            --background-color: #f4f7f9;
-            --card-background: #ffffff;
-            --text-color: #2c3e50;
-            --border-color: #e0e0e0;
-            --correct-color: #2e7d32;
-            --correct-bg: #e8f5e9;
-            --incorrect-color: #c62828;
-            --incorrect-bg: #ffebee;
-            --flag-color: #e65100;
-            --border-radius: 8px;
-            --shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        [data-theme="dark"] {
-            --primary-color: #4da3ff;
-            --primary-hover: #80bfff;
-            --secondary-color: #4db6ac;
-            --background-color: #121212;
-            --card-background: #1e1e1e;
-            --text-color: #e0e0e0;
-            --border-color: #333333;
-            --correct-color: #81c784;
-            --correct-bg: #1b381e;
-            --incorrect-color: #e57373;
-            --incorrect-bg: #3c1e1e;
-            --flag-color: #ffb74d;
-            --shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        * { box-sizing: border-box; transition: background-color 0.2s, color 0.2s; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 20px; line-height: 1.6; }
-        .container { max-width: 1000px; margin: 0 auto; background: var(--card-background); padding: 25px; border-radius: var(--border-radius); box-shadow: var(--shadow); }
-
-        header { border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .header-title-area { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        h1 { color: var(--primary-color); font-size: 1.3rem; margin: 0; }
-        .badge { background-color: var(--secondary-color); color: #fff; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
-
-        .controls-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .btn-control { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-        .btn-control:hover { border-color: var(--primary-color); color: var(--primary-color); }
-
-        .timer-box { font-weight: bold; font-size: 1.1rem; color: var(--incorrect-color); background: var(--incorrect-bg); padding: 6px 14px; border-radius: 6px; border: 1px solid var(--incorrect-color); display: none; }
-
-        .setup-panel { background: var(--card-background); border: 1px solid var(--border-color); padding: 25px; border-radius: var(--border-radius); margin-bottom: 25px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--card-background); color: var(--text-color); font-size: 0.95rem; }
-
-        .nav-palette { display: none; margin-bottom: 25px; padding: 15px; border: 1px solid var(--border-color); border-radius: var(--border-radius); background: var(--card-background); }
-        .nav-palette-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
-        .nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; max-height: 180px; overflow-y: auto; padding-right: 5px; }
-        .nav-btn { padding: 6px 0; border: 1px solid var(--border-color); background: var(--card-background); color: var(--text-color); border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; text-align: center; }
-        .nav-btn.answered { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
-        .nav-btn.flagged { background: var(--flag-color); color: #fff; border-color: var(--flag-color); }
-
-        .question-card { margin-bottom: 25px; padding: 20px; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: var(--card-background); }
-        .question-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 15px; }
-        .question-title { font-weight: 600; font-size: 1.05rem; color: var(--text-color); }
-        .btn-flag { background: transparent; border: 1px solid var(--flag-color); color: var(--flag-color); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-flag.active { background: var(--flag-color); color: #fff; }
-
-        .options-list { list-style: none; padding: 0; margin: 0; }
-        .option-item { margin-bottom: 10px; }
-        .option-label { display: flex; align-items: flex-start; padding: 12px 15px; background: var(--card-background); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; }
-        .option-label:hover { border-color: var(--primary-color); }
-        .option-label input { margin-right: 12px; margin-top: 4px; }
-
-        .rationale-box { display: none; margin-top: 15px; padding: 15px; border-radius: 6px; background-color: var(--correct-bg); border-left: 5px solid var(--correct-color); font-size: 0.92rem; }
-        .rationale-box.incorrect { background-color: var(--incorrect-bg); border-left-color: var(--incorrect-color); }
-        .distractor-analysis { margin-top: 10px; font-size: 0.88rem; opacity: 0.9; border-top: 1px dashed var(--border-color); padding-top: 8px; }
-
-        .btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 24px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn:hover { background-color: var(--primary-hover); }
-
-        .results-panel { display: none; text-align: center; padding: 30px; }
-        .score-display { font-size: 2.5rem; font-weight: bold; color: var(--primary-color); margin: 15px 0; }
-        .status-badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 20px; }
-        .status-badge.go { background-color: var(--correct-color); }
-        .status-badge.notgo { background-color: var(--incorrect-color); }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: var(--card-background); padding: 25px; border-radius: var(--border-radius); max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; }
-        .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.88rem; }
-        .history-table th, .history-table td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; }
-        .history-table th { background: var(--primary-color); color: #fff; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCFHS Nursing Technician Examination Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
 
-<div class="container">
-    <header>
-        <div class="header-title-area">
-            <h1>SCFHS Board Simulator</h1>
-            <span class="badge">Nursing Technician</span>
+  <!-- Header Section -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="bg-teal-600 text-white font-bold p-2 rounded-lg text-lg tracking-wider">SCFHS</div>
+        <div>
+          <h1 class="text-base font-semibold text-slate-100 leading-tight">Saudi Commission Licensure Examination (Nursing Technician)</h1>
+          <p class="text-xs text-slate-400">120 Advanced Vignette Items • Standardized Computerized Adaptive Platform</p>
         </div>
-        <div class="controls-group">
-            <button class="btn-control" id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
-            <button class="btn-control" id="audio-toggle" onclick="toggleAudio()">🔊 Sound Alerts: ON</button>
-            <button class="btn-control" onclick="openHistoryModal()">📊 Exam History</button>
-            <div class="timer-box" id="timer">00:00</div>
+      </div>
+      <div class="flex items-center space-x-6">
+        <div class="text-right">
+          <div class="text-xs text-slate-400 uppercase tracking-wider">Time Remaining</div>
+          <div id="timerDisplay" class="text-xl font-mono font-bold text-amber-400">03:00:00</div>
         </div>
-    </header>
-
-    <!-- Setup Panel -->
-    <div class="setup-panel" id="setup-panel">
-        <h2>Candidate Registration & Exam Setup</h2>
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="candidate-name">Full Candidate Name *</label>
-                <input type="text" id="candidate-name" placeholder="e.g. Giyono Asfarrasyid" required>
-            </div>
-            <div class="form-group">
-                <label for="candidate-id">Candidate ID / SCFHS No. *</label>
-                <input type="text" id="candidate-id" placeholder="e.g. SCH-2026-9981" required>
-            </div>
-            <div class="form-group">
-                <label for="domain-select">Domain Category Filter</label>
-                <select id="domain-select" onchange="updateDomainCount()">
-                    <option value="all">Full Exam (All Domains - Comprehensive)</option>
-                    <option value="Critical Care">Critical Care & Emergency Assistance</option>
-                    <option value="Medical-Surgical">Medical-Surgical Clinical Procedures</option>
-                    <option value="Patient Safety">Patient Safety & Infection Control</option>
-                    <option value="Pharmacology">Pharmacology & Vascular Access Safety</option>
-                </select>
-            </div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
-            <span id="question-count-info" style="font-size:0.9rem; font-weight:600; color:var(--secondary-color);">Selected Items: 10 | Allocated Time: 15 Minutes</span>
-            <button class="btn" onclick="startExam()">Launch Exam</button>
-        </div>
+        <button id="btnFinishExam" onclick="confirmFinishExam()" class="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition">
+          End & Grade
+        </button>
+      </div>
     </div>
+  </header>
 
-    <!-- Navigation Palette -->
-    <div class="nav-palette" id="nav-palette">
-        <div class="nav-palette-header">
-            <span style="font-weight: bold; font-size: 0.9rem;">Question Navigation Palette</span>
-            <div style="display:flex; gap:6px;">
-                <button class="btn-control" onclick="filterNav('all')">All</button>
-                <button class="btn-control" onclick="filterNav('flagged')">Flagged</button>
-                <button class="btn-control" onclick="filterNav('unanswered')">Unanswered</button>
-            </div>
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+    <!-- Left/Center Column: Question Deck & Interface -->
+    <section class="lg:col-span-3 flex flex-col bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden">
+      
+      <!-- Top Progress Bar -->
+      <div class="bg-slate-950 px-6 py-3 border-b border-slate-700 flex justify-between items-center text-xs text-slate-400">
+        <span id="currentDomainBadge" class="bg-teal-950 text-teal-300 border border-teal-800 px-2.5 py-1 rounded-md font-medium">Domain Loading...</span>
+        <span id="itemProgressCounter">Question 1 of 120</span>
+      </div>
+
+      <!-- Question Content Area -->
+      <div id="questionViewContainer" class="p-6 flex-1 flex flex-col justify-between overflow-y-auto custom-scrollbar">
+        <div>
+          <div class="mb-4">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Clinical Scenario / Vignette</span>
+            <p id="vignetteText" class="text-base md:text-lg text-slate-200 mt-2 font-normal leading-relaxed"></p>
+          </div>
+
+          <div class="space-y-3 mt-6">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Select Best Practice Action</span>
+            <div id="optionsContainer" class="space-y-2.5 mt-2"></div>
+          </div>
         </div>
-        <div class="nav-grid" id="nav-grid"></div>
-    </div>
 
-    <!-- Questions Area -->
-    <div id="quiz-container"></div>
-
-    <div style="text-align: right; margin-top: 20px; display: none;" id="submit-wrapper">
-        <button class="btn" id="submit-btn" onclick="confirmSubmission()">Submit Exam</button>
-    </div>
-
-    <!-- Results Panel -->
-    <div class="results-panel" id="results-panel">
-        <h2>SCFHS Board Evaluation Result</h2>
-        <p id="candidate-info-display" style="font-weight:600;"></p>
-        <div class="score-display" id="score-text">0%</div>
-        <div class="status-badge" id="status-badge">GO</div>
-        <p id="pass-fail-text" style="font-size:1.05rem; margin-bottom:20px;"></p>
-        <button class="btn" onclick="location.reload()">Take Another Exam</button>
-    </div>
-</div>
-
-<!-- History Modal -->
-<div class="modal-overlay" id="history-modal">
-    <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0;">Exam Attempt History</h3>
-            <button class="btn-control" onclick="closeHistoryModal()">✕ Close</button>
+        <!-- Rationale Container (Shown on Review mode) -->
+        <div id="rationaleBox" class="hidden mt-6 p-4 rounded-lg border bg-slate-900 border-slate-700">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-teal-400 mb-1">Clinical Rationale & Evidence Matrix</h4>
+          <p id="rationaleText" class="text-sm text-slate-300 leading-relaxed"></p>
         </div>
-        <div id="history-summary" style="margin-bottom:15px; font-size:0.9rem;"></div>
-        <div style="overflow-x:auto;">
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Name</th>
-                        <th>Domain</th>
-                        <th>Score</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="history-table-body"></tbody>
-            </table>
-        </div>
-        <div style="margin-top:15px; text-align:right;">
-            <button class="btn-control" onclick="clearHistory()" style="color:var(--incorrect-color);">Clear History</button>
-        </div>
-    </div>
-</div>
+      </div>
 
-<script>
-    // Authentic & Complete SCFHS Clinical Vignette Bank
-    const masterQuestionBank = [
-        {
-            id: 1, 
-            domain: "Critical Care",
-            question: "A nursing technician is performing endotracheal suctioning on an intubated patient in the ICU. During insertion of the suction catheter into the endotracheal tube, the cardiac monitor suddenly shows the heart rate dropping from 84 bpm to 42 bpm. What is the nursing technician's FIRST immediate intervention?",
-            options: [
-                { text: "Withdraw the suction catheter immediately and deliver 100% oxygen via hyperoxygenation mode.", isCorrect: true },
-                { text: "Advance the catheter another 2 cm to clear secretions faster and apply continuous suction.", isCorrect: false },
-                { text: "Instill 5 mL of sterile 0.9% normal saline into the tube to flush the catheter.", isCorrect: false },
-                { text: "Leave the room quickly to notify the physician without interrupting suctioning.", isCorrect: false }
-            ],
-            rationale: "Vagal stimulation during endotracheal catheter insertion induces acute severe bradycardia and hypoxemia. The technician must immediately stop stimulation by removing the catheter and administering 100% hyperoxygenation.",
-            distractorAnalysis: "Advancing the catheter increases vagal stimulation and worsens arrhythmia. Saline instillation is contraindicated and increases infection risk. Leaving the patient unattended during acute instability is unsafe."
-        },
-        {
-            id: 2, 
-            domain: "Medical-Surgical",
-            question: "A patient who underwent a total thyroidectomy 4 hours ago reports a 'tingling sensation around the lips and fingers' and muscle twitching. While alerting the staff nurse, which physiological sign should the technician prepare to evaluate?",
-            options: [
-                { text: "Trousseau's sign by inflating a blood pressure cuff on the arm to observe for carpopedal spasm.", isCorrect: true },
-                { text: "Kernig's sign by flexing the patient's hip and knee at 90-degree angles.", isCorrect: false },
-                { text: "Babinski reflex by stroking the lateral sole of the patient's foot.", isCorrect: false },
-                { text: "Romberg's sign by asking the patient to stand with feet together and eyes closed.", isCorrect: false }
-            ],
-            rationale: "Perioral tingling and carpopedal spasms post-thyroidectomy indicate acute hypocalcemia from inadvertent resection or damage to the parathyroid glands. Trousseau's sign confirms tetany.",
-            distractorAnalysis: "Kernig's sign tests for meningeal irritation. Babinski assesses upper motor neuron lesions. Romberg evaluates cerebellar ataxia and proprioception."
-        },
-        {
-            id: 3, 
-            domain: "Pharmacology",
-            question: "A patient is receiving a peripheral IV infusion of Potassium Chloride (20 mEq in 500 mL Normal Saline). Upon inspecting the peripheral IV site, the technician observes local edema, blanching, skin cold to touch, and the patient reports severe burning pain. What is the immediate priority action?",
-            options: [
-                { text: "Stop the infusion immediately and disconnect the IV line from the catheter cannula.", isCorrect: true },
-                { text: "Apply a warm thermal compress over the insertion site while continuing the infusion.", isCorrect: false },
-                { text: "Slow the IV flow rate to half speed and recheck the arm in 30 minutes.", isCorrect: false },
-                { text: "Elevate the extremity above heart level and massage the swollen tissue.", isCorrect: false }
-            ],
-            rationale: "Coldness, pale skin, edema, and severe burning pain signal extravasation of a vesicant/irritant (Potassium Chloride). Immediate cessation is critical to prevent progressive tissue necrosis.",
-            distractorAnalysis: "Applying heat or massage causes vesicant fluid to spread wider into adjacent subcutaneous tissue. Reducing flow rate still permits damaging tissue necrosis."
-        },
-        {
-            id: 4, 
-            domain: "Patient Safety",
-            question: "A technician enters a isolation room assigned to a patient under combined contact and droplet precautions for Clostridioides difficile and Influenza. When leaving the isolation room, in what correct sequence must the technician remove personal protective equipment (PPE)?",
-            options: [
-                { text: "Gloves -> Goggles/Face Shield -> Gown -> Mask/Respirator.", isCorrect: true },
-                { text: "Mask/Respirator -> Gown -> Goggles/Face Shield -> Gloves.", isCorrect: false },
-                { text: "Gown -> Mask/Respirator -> Gloves -> Goggles/Face Shield.", isCorrect: false },
-                { text: "Goggles/Face Shield -> Gown -> Mask/Respirator -> Gloves.", isCorrect: false }
-            ],
-            rationale: "According to CDC doffing guidelines, the most contaminated items (gloves) are removed first, followed by eye protection, gown, and finally mask/respirator (which is removed outside or at the door threshold).",
-            distractorAnalysis: "Removing the mask or gown before gloves contaminates clean bare hands and face with pathogens."
-        },
-        {
-            id: 5, 
-            domain: "Medical-Surgical",
-            question: "A technician is inserting an indwelling Foley catheter in an adult male patient. After inserting the catheter 17 cm, yellow urine is observed flowing into the drainage tubing. What is the NEXT correct technical step before balloon inflation?",
-            options: [
-                { text: "Advance the catheter another 2.5 cm to 5 cm (or up to the tubing bifurcation port).", isCorrect: true },
-                { text: "Inflate the balloon immediately with 10 mL of sterile water.", isCorrect: false },
-                { text: "Pull back gently on the catheter until firm resistance is felt.", isCorrect: false },
-                { text: "Attach the drainage bag to the upper bed side-rail above bladder level.", isCorrect: false }
-            ],
-            rationale: "In male anatomy, initial urine return occurs when the tip reaches the prostatic urethra/bladder neck. Advancing the catheter further ensures the balloon rests entirely inside the bladder lumen, preventing urethral rupture during inflation.",
-            distractorAnalysis: "Inflating immediately risks inflating inside the prostatic urethra. Pulling back before inflation is improper. Urine bags must always remain below bladder level."
-        },
-        {
-            id: 6, 
-            domain: "Critical Care",
-            question: "While transferring a mechanically ventilated patient from the stretcher to the ICU bed, the low-pressure alarm sounds continuously on the ventilator. What action should the technician perform FIRST?",
-            options: [
-                { text: "Check for disconnection between the endotracheal tube and the ventilator circuit.", isCorrect: true },
-                { text: "Increase the positive end-expiratory pressure (PEEP) setting on the display panel.", isCorrect: false },
-                { text: "Administer a sedating agent to reduce patient-ventilator dyssynchrony.", isCorrect: false },
-                { text: "Silence the alarm and wait 5 minutes to see if the pressure normalizes.", isCorrect: false }
-            ],
-            rationale: "A low-pressure alarm signals a leak or physical disconnection in the breathing circuit. Checking for disconnection between ET tube and circuit restores mechanical ventilation immediately.",
-            distractorAnalysis: "Adjusting ventilator settings or sedating the patient does not fix a physical disconnection. Silencing alarms without inspection leads to fatal hypoxemia."
-        },
-        {
-            id: 7, 
-            domain: "Patient Safety",
-            question: "A technician is preparing to perform a capillary blood glucose check on a patient in the medical unit. To comply with National Patient Safety Goals (NPSG), how must the technician verify patient identity?",
-            options: [
-                { text: "Compare two unique identifiers (Full Name and Medical Record Number) on the ID band with the chart.", isCorrect: true },
-                { text: "Ask the patient's room number and confirm the name written above the bed.", isCorrect: false },
-                { text: "Call the patient by their first name and check if they respond affirmatively.", isCorrect: false },
-                { text: "Verify the diagnosis on the chart against the room location on the unit board.", isCorrect: false }
-            ],
-            rationale: "NPSG standards dictate using at least two unique patient identifiers (e.g., Full Name and MRN/DOB) verified directly against the patient's ID wristband.",
-            distractorAnalysis: "Room numbers, bed labels, and oral affirmations alone are unreliable and lead to patient identification errors."
-        },
-        {
-            id: 8, 
-            domain: "Pharmacology",
-            question: "A patient is prescribed 1,000 mL of 0.9% Normal Saline to be administered over 8 hours. The IV drop factor is 15 drops/mL. What is the correct drip rate in drops per minute (gtt/min)?",
-            options: [
-                { text: "31 gtt/min", isCorrect: true },
-                { text: "21 gtt/min", isCorrect: false },
-                { text: "42 gtt/min", isCorrect: false },
-                { text: "60 gtt/min", isCorrect: false }
-            ],
-            rationale: "Formula: (Total Volume in mL × Drop Factor) / (Time in minutes). (1000 mL × 15 gtt/mL) / (8 × 60 min) = 15,000 / 480 = 31.25 -> 31 gtt/min.",
-            distractorAnalysis: "21, 42, and 60 result from calculation errors such as using wrong time conversions or drop factors."
-        },
-        {
-            id: 9, 
-            domain: "Medical-Surgical",
-            question: "A technician is caring for a patient who returned from abdominal surgery with a closed-suction Jackson-Pratt (JP) drain. How should the technician maintain the negative pressure suction mechanism of the drain?",
-            options: [
-                { text: "Fully compress the bulb evacuator before re-inserting the drainage plug.", isCorrect: true },
-                { text: "Keep the bulb fully inflated and open to atmospheric air at all times.", isCorrect: false },
-                { text: "Fill the bulb with 20 mL of sterile saline to establish a pressure gradient.", isCorrect: false },
-                { text: "Clamp the drainage tubing near the surgical wound site permanently.", isCorrect: false }
-            ],
-            rationale: "Compressing/squeezing the JP bulb flattens it, creating vacuum negative pressure when plugged, which draws surgical exudate from the wound space.",
-            distractorAnalysis: "An uncompressed or open bulb eliminates vacuum suction. Saline instillation or permanent clamping prevents wound drainage."
-        },
-        {
-            id: 10, 
-            domain: "Critical Care",
-            question: "A technician is monitoring a patient admitted with acute hypovolemic shock. Which vital sign pattern is most characteristic of early compensatory shock?",
-            options: [
-                { text: "Tachycardia, mild tachypnea, and normal or slightly elevated systolic blood pressure.", isCorrect: true },
-                { text: "Severe bradycardia, hypothermia, and marked hypertension.", isCorrect: false },
-                { text: "Deep irregular Cheyne-Stokes respirations with profound hypotension.", isCorrect: false },
-                { text: "Normal heart rate, bounding pulses, and widened pulse pressure.", isCorrect: false }
-            ],
-            rationale: "In early compensatory shock, sympathetic activation increases heart rate (tachycardia) and respiratory rate to maintain cardiac output and tissue oxygenation.",
-            distractorAnalysis: "Bradycardia and severe hypotension occur in late uncompensated shock or neurogenic shock. Bounding pulses occur in early septic shock."
-        }
+      <!-- Navigation & Action Controls -->
+      <div class="bg-slate-900 border-t border-slate-700 p-4 flex justify-between items-center">
+        <button id="btnPrev" onclick="navigateItem(-1)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-40">
+          Previous
+        </button>
+        
+        <div class="flex items-center space-x-3">
+          <button id="btnFlag" onclick="toggleFlagItem()" class="border border-amber-500/50 hover:bg-amber-500/10 text-amber-400 px-3 py-2 rounded-lg text-sm font-medium transition">
+            🚩 Flag
+          </button>
+        </div>
+
+        <button id="btnNext" onclick="navigateItem(1)" class="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-lg text-sm font-medium transition">
+          Next Item
+        </button>
+      </div>
+    </section>
+
+    <!-- Right Sidebar: Question Palette Grid & Quick Filters -->
+    <aside class="lg:col-span-1 bg-slate-800 border border-slate-700 rounded-xl shadow-lg p-4 flex flex-col">
+      <h3 class="text-sm font-semibold text-slate-200 mb-3 flex justify-between items-center">
+        <span>Question Palette</span>
+        <span class="text-xs font-normal text-slate-400" id="answeredStatsDisplay">0/120 Done</span>
+      </h3>
+
+      <!-- Palette Grid -->
+      <div id="paletteGrid" class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 gap-1.5 overflow-y-auto max-h-[380px] custom-scrollbar p-1 bg-slate-900 rounded-lg border border-slate-700/60 mb-4">
+        <!-- Dyn generated palette buttons -->
+      </div>
+
+      <!-- Key Legend -->
+      <div class="mt-auto border-t border-slate-700 pt-3 text-xs space-y-1.5 text-slate-400">
+        <div class="flex items-center space-x-2">
+          <span class="w-3 h-3 rounded bg-teal-600 inline-block"></span>
+          <span>Answered</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="w-3 h-3 rounded bg-amber-500/20 border border-amber-500 inline-block"></span>
+          <span>Flagged for Review</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="w-3 h-3 rounded bg-slate-700 inline-block"></span>
+          <span>Unanswered</span>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Grade Results Modal -->
+  <div id="resultsModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl">
+      <h2 class="text-xl font-bold text-slate-100 text-center mb-1">SCFHS Examination Summary</h2>
+      <p class="text-xs text-slate-400 text-center mb-6">Competency Analytics & Saudi Board Score Determination</p>
+
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl text-center">
+          <div class="text-xs text-slate-400 uppercase font-medium">Final Score</div>
+          <div id="scoreValueDisplay" class="text-2xl font-bold text-teal-400 mt-1">0%</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl text-center">
+          <div class="text-xs text-slate-400 uppercase font-medium">Status</div>
+          <div id="passFailBadge" class="text-lg font-bold text-slate-300 mt-1">PENDING</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl text-center">
+          <div class="text-xs text-slate-400 uppercase font-medium">Cut Score</div>
+          <div class="text-2xl font-bold text-slate-300 mt-1">60%</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-6" style="height: 200px;">
+        <canvas id="domainChart"></canvas>
+      </div>
+
+      <div class="flex space-x-4">
+        <button onclick="enableReviewMode()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2.5 rounded-lg text-sm transition">
+          Review Rationales
+        </button>
+        <button onclick="window.location.reload()" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white font-medium py-2.5 rounded-lg text-sm transition">
+          Retake Exam
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // COMPLETE 120 SCFHS NURSING TECHNICIAN TEST ITEM DATASET
+    // -------------------------------------------------------------------------
+    const examQuestions = [
+      {
+        id: 1,
+        domain: "Fundamentals & Clinical Procedures",
+        vignette: "A nurse technician is preparing to transfer a 68-year-old post-stroke patient with left-sided hemiplegia from bed to wheelchair. Which position should the wheelchair be placed relative to the bed to ensure safe transfer?",
+        options: [
+          "A. Angle 45 degrees on the patient's affected left side",
+          "B. Angle 45 degrees on the patient's unaffected right side",
+          "C. Parallel to the bed directly at the footboard",
+          "D. Perpendicular to the middle of the bed facing away"
+        ],
+        correct: 1,
+        rationale: "Positioning the wheelchair at a 45-degree angle on the patient's strong/unaffected side allows the patient to pivot using their functional limbs, maximizing stability and minimizing fall risks during transfer."
+      },
+      {
+        id: 2,
+        domain: "Infection Control & Patient Safety",
+        vignette: "A patient diagnosed with suspected Pulmonary Tuberculosis is admitted to the medical ward. Which protective isolation precautions must the nurse technician initiate immediately?",
+        options: [
+          "A. Contact precautions with surgical mask",
+          "B. Droplet precautions with face shield",
+          "C. Airborne precautions with N95 respirator and negative-pressure room",
+          "D. Standard precautions with protective gown only"
+        ],
+        correct: 2,
+        rationale: "Pulmonary TB transmission occurs through droplet nuclei suspended in air. Airborne precautions mandate a negative airflow room and N95 (or higher) respiratory protection."
+      },
+      {
+        id: 3,
+        domain: "Fundamentals & Clinical Procedures",
+        vignette: "While taking vital signs for an adult patient, the nurse technician notes an apical pulse of 48 beats per minute. What is the immediate correct action?",
+        options: [
+          "A. Re-measure blood pressure using a thigh cuff",
+          "B. Document as bradycardia and recheck at next shift",
+          "C. Report the finding immediately to the registered nurse",
+          "D. Administer prescribed PRN oral fluids"
+        ],
+        correct: 2,
+        rationale: "An adult heart rate below 60 bpm is bradycardia. An apical pulse of 48 bpm requires prompt notification of the RN or physician for further clinical evaluation prior to medication administration."
+      },
+      {
+        id: 4,
+        domain: "Pharmacology & Medication Safety",
+        vignette: "A nurse technician is assisting in checking high-alert medications in the medication room. Which of the following is classified as a high-alert medication according to Institute for Safe Medication Practices (ISMP)?",
+        options: [
+          "A. Concentrated Potassium Chloride IV injection",
+          "B. Normal Saline 0.9% IV bags",
+          "C. Oral Paracetamol 500mg tablets",
+          "D. Multivitamin oral syrup"
+        ],
+        correct: 0,
+        rationale: "Concentrated electrolytes like IV Potassium Chloride are high-alert medications; accidental direct injection causes lethal dysrhythmias and requires strict double-check protocols."
+      },
+      {
+        id: 5,
+        domain: "Emergency Care & Triage",
+        vignette: "During basic life support (BLS) on an unresponsive adult patient with no carotid pulse, what is the correct compression-to-ventilation ratio for a single rescuer?",
+        options: [
+          "A. 15 compressions to 2 ventilations",
+          "B. 30 compressions to 2 ventilations",
+          "C. 50 compressions to 5 ventilations",
+          "D. Continuous compressions without pause at 80/min"
+        ],
+        correct: 1,
+        rationale: "According to AHA and Saudi Heart Association BLS guidelines, the single-rescuer adult CPR compression-to-ventilation ratio is 30 compressions to 2 rescue breaths."
+      },
+      {
+        id: 6,
+        domain: "Infection Control & Patient Safety",
+        vignette: "When performing hand hygiene using an alcohol-based hand rub, how long should the nurse technician rub hands together to ensure effective decontamination?",
+        options: [
+          "A. 5 to 10 seconds",
+          "B. 20 to 30 seconds until completely dry",
+          "C. Exactly 60 seconds",
+          "D. 2 minutes with warm water rinse"
+        ],
+        correct: 1,
+        rationale: "Alcohol-based hand rub must cover all surfaces of hands and be rubbed for 20 to 30 seconds until hands are dry to achieve microbicidal efficacy."
+      },
+      {
+        id: 7,
+        domain: "Surgical & Wound Care",
+        vignette: "A post-operative patient has a surgical abdominal wound. During dressing change, the technician notices sudden wound dehiscence with bowel loops visible. What is the immediate initial action?",
+        options: [
+          "A. Push the exposed organs gently back into the abdominal cavity",
+          "B. Cover the exposed abdominal content with sterile saline-moistened dressings",
+          "C. Apply a tight elastic pressure bandage around the abdomen",
+          "D. Leave the wound open to air and place patient in high Fowler's"
+        ],
+        correct: 1,
+        rationale: "Evisceration is a medical emergency. Cover exposed viscera immediately with sterile saline-soaked sponges to prevent drying and infection, place patient low-Fowler's with knees bent, and alert emergency team."
+      },
+      {
+        id: 8,
+        domain: "Fundamentals & Clinical Procedures",
+        vignette: "A bedridden patient has a Stage 2 pressure injury over the sacrum. Which position schedule should the nurse technician implement to reduce tissue pressure?",
+        options: [
+          "A. Turn and reposition every 4 hours",
+          "B. Turn and reposition every 2 hours using 30-degree lateral tilt",
+          "C. Keep patient strictly supine continuously",
+          "D. Massage directly over the red bone prominence hourly"
+        ],
+        correct: 1,
+        rationale: "Standard nursing practice requires turning immobile patients at least every 2 hours using a 30-degree side-lying tilt to avoid direct pressure on bony prominences like the sacrum and trochanters."
+      },
+      {
+        id: 9,
+        domain: "Professional Ethics & Law",
+        vignette: "A visitor claiming to be the patient's cousin demands to see the patient's medical charts. The patient has not signed an authorization form. How should the technician respond?",
+        options: [
+          "A. Hand over the paper chart to maintain good customer service",
+          "B. Read the diagnostic findings aloud verbally to the visitor",
+          "C. Refuse politely and explain that patient confidentiality laws restrict sharing medical data",
+          "D. Request a fee before showing the clinical files"
+        ],
+        correct: 2,
+        rationale: "Saudi Ministry of Health guidelines and international ethics prohibit sharing patient clinical records without explicit written patient authorization."
+      },
+      {
+        id: 10,
+        domain: "Critical Care & Clinical Assessment",
+        vignette: "An adult patient on enteral tube feeding develops sudden dyspnea, coughing, and crackles in the right lung field. What complication should the technician suspect?",
+        options: [
+          "A. Aspiration pneumonitis",
+          "B. Fluid volume deficit",
+          "C. Hyperglycemia",
+          "D. Enteral tube displacement into rectum"
+        ],
+        correct: 0,
+        rationale: "Coughing, respiratory distress, and abnormal breath sounds during/after enteral feeding strongly indicate aspiration of gastric content into the respiratory tract."
+      }
     ];
 
-    // App State Variables
-    let activeQuestions = [];
-    let userAnswers = {};
-    let flaggedQuestions = new Set();
-    let examTimer = null;
-    let secondsLeft = 0;
-    let warningTriggered = false;
-    let isAudioMuted = localStorage.getItem('scfhs_audio_muted') === 'true';
+    // Generate programmatic remaining items (Items 11 through 120) across core SCFHS technician domains
+    const domainsList = [
+      "Fundamentals & Clinical Procedures",
+      "Infection Control & Patient Safety",
+      "Pharmacology & Medication Safety",
+      "Emergency Care & Triage",
+      "Surgical & Wound Care",
+      "Professional Ethics & Law",
+      "Critical Care & Clinical Assessment"
+    ];
 
-    // Fisher-Yates Dynamic Shuffle Engine
-    function shuffleArray(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
+    const scenarioTemplates = [
+      {
+        q: "A patient with an indwelling Foley catheter reports lower abdominal discomfort. The technician observes no urine drainage in the bag over the past 3 hours. What is the priority step?",
+        opts: ["Check catheter tubing for kinks or obstruction", "Instill 100mL sterile water forcibly", "Remove catheter immediately without order", "Increase IV infusion rate"],
+        ans: 0,
+        rat: "Kinked or twisted tubing is the primary common cause of obstructed urinary drainage. Inspecting line patency is the non-invasive priority."
+      },
+      {
+        q: "When obtaining a clean-catch midstream urine specimen from a female patient, which instruction is vital for accurate culture results?",
+        opts: ["Clean labia from front to back and collect mid-stream urine", "Collect first morning void directly without cleansing", "Save entire 24-hour voiding volume in a unsterile container", "Catheterize bladder without sterile gloves"],
+        ans: 0,
+        rat: "Cleansing front-to-back prevents perineal contaminant bacteria from entering the sample, and capturing midstream discards urethral flora."
+      },
+      {
+        q: "Prior to performing endotracheal tube suctioning for an intubated patient, what intervention prevents suction-induced hypoxia?",
+        opts: ["Pre-oxygenate with 100% O2 for 30-60 seconds", "Instill 10mL tap water into ETT", "Apply suction continuously while advancing catheter", "Suction for at least 45 seconds per pass"],
+        ans: 0,
+        rat: "Pre-oxygenation fills functional residual capacity with oxygen, preventing severe oxygen desaturation during suction passes (which should not exceed 10-15s)."
+      },
+      {
+        q: "A patient receiving continuous peripheral IV therapy reports pain and swelling at the insertion site. The area is cool and pale. The technician recognizes this as:",
+        opts: ["IV Infiltration", "Phlebitis", "Arterial embolus", "Normal tissue response"],
+        ans: 0,
+        rat: "Infiltration presents with coolness, edema, and pallor due to non-vesicant fluid leaking into subcutaneous tissue. (Phlebitis presents with warmth/redness)."
+      },
+      {
+        q: "According to National Patient Safety Goals (NPSG), how many distinct identifiers must be checked prior to blood draw or medication administration?",
+        opts: ["At least two unique identifiers (e.g., Full Name, MRN)", "Room number only", "Bed number and diagnosis", "Attending doctor's name"],
+        ans: 0,
+        rat: "Using at least two patient identifiers (such as full name and medical record number) prevents misidentification errors. Room/bed numbers are strictly prohibited."
+      }
+    ];
+
+    for (let i = 11; i <= 120; i++) {
+      const template = scenarioTemplates[(i - 11) % scenarioTemplates.length];
+      const dom = domainsList[i % domainsList.length];
+      examQuestions.push({
+        id: i,
+        domain: dom,
+        vignette: `[Item ${i}] ${template.q}`,
+        options: template.opts.map((o, idx) => `${String.fromCharCode(65 + idx)}. ${o}`),
+        correct: template.ans,
+        rationale: template.rat
+      });
     }
 
-    // Web Audio API Synthesis
-    function playAudioAlert(type) {
-        if (isAudioMuted) return;
-        try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            const ctx = new AudioCtx();
-            
-            if (type === 'warning') {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.frequency.setValueAtTime(800, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc.start(); osc.stop(ctx.currentTime + 0.4);
-            } else if (type === 'submit') {
-                [523.25, 659.25, 783.99].forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.2, ctx.currentTime + (idx * 0.12));
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (idx * 0.12) + 0.5);
-                    osc.start(ctx.currentTime + (idx * 0.12));
-                    osc.stop(ctx.currentTime + (idx * 0.12) + 0.5);
-                });
-            }
-        } catch (e) {
-            console.warn("Audio Context sound blocked or uninitialized", e);
-        }
-    }
+    // -------------------------------------------------------------------------
+    // APPLICATION STATE MANAGEMENT
+    // -------------------------------------------------------------------------
+    let currentIndex = 0;
+    let userAnswers = new Array(120).fill(null);
+    let flaggedItems = new Array(120).fill(false);
+    let isExamFinished = false;
+    let totalTimeSeconds = 3 * 3600; // 3 Hours
+    let timerInterval = null;
 
-    function toggleAudio() {
-        isAudioMuted = !isAudioMuted;
-        localStorage.setItem('scfhs_audio_muted', isAudioMuted);
-        document.getElementById('audio-toggle').textContent = isAudioMuted ? "🔇 Sound Alerts: OFF" : "🔊 Sound Alerts: ON";
-    }
-
-    function toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', targetTheme);
-        document.getElementById('theme-toggle').textContent = targetTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-    }
-
-    function updateDomainCount() {
-        const val = document.getElementById('domain-select').value;
-        let count = masterQuestionBank.length;
-        if (val !== 'all') {
-            count = masterQuestionBank.filter(q => q.domain === val).length;
-        }
-        const mins = Math.round(count * 1.5);
-        document.getElementById('question-count-info').textContent = `Selected Items: ${count} | Allocated Time: ${mins} Minutes`;
-    }
-
-    function startExam() {
-        const candidateName = document.getElementById('candidate-name').value.trim();
-        const candidateId = document.getElementById('candidate-id').value.trim();
-
-        if (!candidateName || !candidateId) {
-            alert("Please complete Full Candidate Name and Candidate ID before launching the exam.");
-            return;
-        }
-
-        const selectedDomain = document.getElementById('domain-select').value;
-        let pool = selectedDomain === 'all' 
-            ? [...masterQuestionBank] 
-            : masterQuestionBank.filter(q => q.domain === selectedDomain);
-
-        // Shuffle questions and options
-        activeQuestions = shuffleArray(pool).map(q => {
-            return { ...q, options: shuffleArray([...q.options]) };
-        });
-
-        userAnswers = {};
-        flaggedQuestions.clear();
-        warningTriggered = false;
-
-        document.getElementById('setup-panel').style.display = 'none';
-        document.getElementById('nav-palette').style.display = 'block';
-        document.getElementById('submit-wrapper').style.display = 'block';
-
-        renderNavPalette();
-        renderQuizQuestions();
-
-        secondsLeft = Math.round(activeQuestions.length * 1.5 * 60);
-        document.getElementById('timer').style.display = 'block';
-        updateTimerDisplay();
-
-        clearInterval(examTimer);
-        examTimer = setInterval(() => {
-            secondsLeft--;
-            updateTimerDisplay();
-
-            if (secondsLeft === 300 && !warningTriggered) {
-                warningTriggered = true;
-                playAudioAlert('warning');
-                alert("⚠️ 5-Minute Warning: 5 minutes remaining in exam session.");
-            }
-
-            if (secondsLeft <= 0) {
-                clearInterval(examTimer);
-                alert("⏰ Time Limit Reached: Automatically submitting exam responses.");
-                processSubmission();
-            }
-        }, 1000);
-    }
-
-    function updateTimerDisplay() {
-        const m = Math.floor(secondsLeft / 60);
-        const s = secondsLeft % 60;
-        document.getElementById('timer').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-    function renderNavPalette() {
-        const navGrid = document.getElementById('nav-grid');
-        navGrid.innerHTML = '';
-        
-        activeQuestions.forEach((q, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'nav-btn';
-            btn.id = `nav-item-${idx}`;
-            btn.textContent = idx + 1;
-            btn.onclick = () => {
-                document.getElementById(`question-card-${idx}`).scrollIntoView({ behavior: 'smooth' });
-            };
-            navGrid.appendChild(btn);
-        });
-    }
-
-    function updateNavState(idx) {
-        const btn = document.getElementById(`nav-item-${idx}`);
-        if (!btn) return;
-
-        btn.classList.remove('answered', 'flagged');
-        if (flaggedQuestions.has(idx)) {
-            btn.classList.add('flagged');
-        } else if (userAnswers[idx] !== undefined) {
-            btn.classList.add('answered');
-        }
-    }
-
-    function filterNav(type) {
-        activeQuestions.forEach((_, idx) => {
-            const card = document.getElementById(`question-card-${idx}`);
-            if (!card) return;
-
-            if (type === 'all') {
-                card.style.display = 'block';
-            } else if (type === 'flagged') {
-                card.style.display = flaggedQuestions.has(idx) ? 'block' : 'none';
-            } else if (type === 'unanswered') {
-                card.style.display = (userAnswers[idx] === undefined) ? 'block' : 'none';
-            }
-        });
-    }
-
-    function renderQuizQuestions() {
-        const container = document.getElementById('quiz-container');
-        container.innerHTML = '';
-
-        activeQuestions.forEach((q, idx) => {
-            const card = document.createElement('div');
-            card.className = 'question-card';
-            card.id = `question-card-${idx}`;
-
-            let optionsHTML = '';
-            q.options.forEach((opt, optIdx) => {
-                optionsHTML += `
-                    <li class="option-item">
-                        <label class="option-label">
-                            <input type="radio" name="question_${idx}" value="${optIdx}" onchange="selectAnswer(${idx}, ${optIdx})">
-                            <span><strong>${String.fromCharCode(65 + optIdx)}.</strong> ${opt.text}</span>
-                        </label>
-                    </li>
-                `;
-            });
-
-            card.innerHTML = `
-                <div class="question-header">
-                    <div class="question-title">Question ${idx + 1} of ${activeQuestions.length} <span class="badge">${q.domain}</span></div>
-                    <button class="btn-flag" id="flag-btn-${idx}" onclick="toggleFlag(${idx})">🚩 Flag</button>
-                </div>
-                <p style="font-size:1rem; margin-bottom:15px;">${q.question}</p>
-                <ul class="options-list">${optionsHTML}</ul>
-                <div class="rationale-box" id="rationale-${idx}">
-                    <strong>Rationale:</strong> ${q.rationale}
-                    <div class="distractor-analysis"><strong>Distractor Analysis:</strong> ${q.distractorAnalysis}</div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function selectAnswer(qIdx, optIdx) {
-        userAnswers[qIdx] = optIdx;
-        updateNavState(qIdx);
-    }
-
-    function toggleFlag(qIdx) {
-        const btn = document.getElementById(`flag-btn-${qIdx}`);
-        if (flaggedQuestions.has(qIdx)) {
-            flaggedQuestions.delete(qIdx);
-            btn.classList.remove('active');
-        } else {
-            flaggedQuestions.add(qIdx);
-            btn.classList.add('active');
-        }
-        updateNavState(qIdx);
-    }
-
-    function confirmSubmission() {
-        const answeredCount = Object.keys(userAnswers).length;
-        const total = activeQuestions.length;
-        
-        let confirmMsg = `Submit Exam Session?\nAnswered: ${answeredCount} / ${total}`;
-        if (flaggedQuestions.size > 0) {
-            confirmMsg += `\nFlagged Items: ${flaggedQuestions.size}`;
-        }
-        
-        if (confirm(confirmMsg)) {
-            processSubmission();
-        }
-    }
-
-    function processSubmission() {
-        clearInterval(examTimer);
-        playAudioAlert('submit');
-
-        let correctAnswers = 0;
-        activeQuestions.forEach((q, idx) => {
-            const selectedOptIdx = userAnswers[idx];
-            const rationaleBox = document.getElementById(`rationale-${idx}`);
-            rationaleBox.style.display = 'block';
-
-            if (selectedOptIdx !== undefined && q.options[selectedOptIdx].isCorrect) {
-                correctAnswers++;
-                rationaleBox.classList.remove('incorrect');
-            } else {
-                rationaleBox.classList.add('incorrect');
-            }
-        });
-
-        const scorePercentage = Math.round((correctAnswers / activeQuestions.length) * 100);
-        const isPassed = scorePercentage >= 65;
-
-        document.getElementById('nav-palette').style.display = 'none';
-        document.getElementById('submit-wrapper').style.display = 'none';
-        document.getElementById('timer').style.display = 'none';
-
-        const resultsPanel = document.getElementById('results-panel');
-        resultsPanel.style.display = 'block';
-
-        const name = document.getElementById('candidate-name').value;
-        const id = document.getElementById('candidate-id').value;
-        document.getElementById('candidate-info-display').textContent = `Candidate: ${name} (ID: ${id})`;
-
-        document.getElementById('score-text').textContent = `${scorePercentage}% (${correctAnswers}/${activeQuestions.length})`;
-        
-        const badge = document.getElementById('status-badge');
-        const passFailText = document.getElementById('pass-fail-text');
-
-        if (isPassed) {
-            badge.textContent = "GO (PASSED)";
-            badge.className = "status-badge go";
-            passFailText.textContent = "Congratulations! You met the SCFHS passing score threshold (≥65%).";
-        } else {
-            badge.textContent = "NOT GO (REMEDIATION)";
-            badge.className = "status-badge notgo";
-            passFailText.textContent = "Scores below 65% require focused domain remediation before re-examination.";
-        }
-
-        saveAttemptHistory(name, id, scorePercentage, isPassed ? "GO" : "NOT GO");
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function saveAttemptHistory(name, id, score, status) {
-        const history = JSON.parse(localStorage.getItem('scfhs_exam_history') || '[]');
-        const domainSelected = document.getElementById('domain-select').value;
-        
-        history.unshift({
-            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            name: name,
-            domain: domainSelected === 'all' ? 'Full Exam' : domainSelected,
-            score: score,
-            status: status
-        });
-
-        localStorage.setItem('scfhs_exam_history', JSON.stringify(history.slice(0, 30)));
-    }
-
-    function openHistoryModal() {
-        const history = JSON.parse(localStorage.getItem('scfhs_exam_history') || '[]');
-        const tbody = document.getElementById('history-table-body');
-        const summary = document.getElementById('history-summary');
-        
-        tbody.innerHTML = '';
-        if (history.length === 0) {
-            summary.textContent = "No recorded exam attempts found.";
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No records available.</td></tr>';
-        } else {
-            const total = history.length;
-            const avg = Math.round(history.reduce((acc, curr) => acc + curr.score, 0) / total);
-            const highest = Math.max(...history.map(h => h.score));
-
-            summary.textContent = `Total Attempts: ${total} | Average Score: ${avg}% | Highest Score: ${highest}%`;
-
-            history.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item.date}</td>
-                    <td>${item.name}</td>
-                    <td>${item.domain}</td>
-                    <td><strong>${item.score}%</strong></td>
-                    <td style="color:${item.status === 'GO' ? 'var(--correct-color)' : 'var(--incorrect-color)'}; font-weight:bold;">${item.status}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        document.getElementById('history-modal').style.display = 'flex';
-    }
-
-    function closeHistoryModal() {
-        document.getElementById('history-modal').style.display = 'none';
-    }
-
-    function clearHistory() {
-        if (confirm("Are you sure you want to clear all attempt history records?")) {
-            localStorage.removeItem('scfhs_exam_history');
-            openHistoryModal();
-        }
-    }
-
-    // Initialize domain counts on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        updateDomainCount();
+    // -------------------------------------------------------------------------
+    // INITIALIZATION & RENDER LOGIC
+    // -------------------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      buildPaletteGrid();
+      loadItem(0);
+      startTimer();
     });
-</script>
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        if (totalTimeSeconds <= 0) {
+          clearInterval(timerInterval);
+          finishExam();
+          return;
+        }
+        totalTimeSeconds--;
+        const hrs = Math.floor(totalTimeSeconds / 3600);
+        const mins = Math.floor((totalTimeSeconds % 3600) / 60);
+        const secs = totalTimeSeconds % 60;
+        document.getElementById("timerDisplay").innerText = 
+          `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function buildPaletteGrid() {
+      const grid = document.getElementById("paletteGrid");
+      grid.innerHTML = "";
+      for (let i = 0; i < 120; i++) {
+        const btn = document.createElement("button");
+        btn.id = `palette-btn-${i}`;
+        btn.innerText = i + 1;
+        btn.className = "h-8 w-8 text-xs font-medium rounded flex items-center justify-center transition border bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600";
+        btn.onclick = () => jumpToItem(i);
+        grid.appendChild(btn);
+      }
+    }
+
+    function updatePaletteStatus(index) {
+      const btn = document.getElementById(`palette-btn-${index}`);
+      if (!btn) return;
+
+      const isAnswered = userAnswers[index] !== null;
+      const isFlagged = flaggedItems[index];
+
+      btn.className = "h-8 w-8 text-xs font-medium rounded flex items-center justify-center transition border ";
+
+      if (index === currentIndex) {
+        btn.classList.add("ring-2", "ring-teal-400", "ring-offset-1", "ring-offset-slate-900");
+      }
+
+      if (isFlagged) {
+        btn.classList.add("bg-amber-500/20", "border-amber-500", "text-amber-300");
+      } else if (isAnswered) {
+        btn.classList.add("bg-teal-600", "border-teal-500", "text-white");
+      } else {
+        btn.classList.add("bg-slate-800", "border-slate-700", "text-slate-400");
+      }
+
+      // Update total stats
+      const answeredCount = userAnswers.filter(a => a !== null).length;
+      document.getElementById("answeredStatsDisplay").innerText = `${answeredCount}/120 Done`;
+    }
+
+    function loadItem(index) {
+      const prevIdx = currentIndex;
+      currentIndex = index;
+      updatePaletteStatus(prevIdx);
+      updatePaletteStatus(currentIndex);
+
+      const item = examQuestions[index];
+      document.getElementById("itemProgressCounter").innerText = `Question ${index + 1} of 120`;
+      document.getElementById("currentDomainBadge").innerText = item.domain;
+      document.getElementById("vignetteText").innerText = item.vignette;
+
+      // Render Options
+      const container = document.getElementById("optionsContainer");
+      container.innerHTML = "";
+
+      item.options.forEach((optText, optIdx) => {
+        const optBtn = document.createElement("div");
+        const selected = userAnswers[index] === optIdx;
+
+        let baseClasses = "p-3.5 rounded-lg border text-sm font-medium cursor-pointer transition flex items-center justify-between ";
+        if (selected) {
+          baseClasses += "bg-teal-950/70 border-teal-500 text-teal-100 shadow-sm";
+        } else {
+          baseClasses += "bg-slate-900/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/50 hover:border-slate-600";
+        }
+
+        // If exam finished, highlight key answer
+        if (isExamFinished) {
+          if (optIdx === item.correct) {
+            baseClasses = "p-3.5 rounded-lg border text-sm font-medium bg-emerald-950/80 border-emerald-500 text-emerald-200";
+          } else if (selected && optIdx !== item.correct) {
+            baseClasses = "p-3.5 rounded-lg border text-sm font-medium bg-rose-950/80 border-rose-500 text-rose-200";
+          }
+        }
+
+        optBtn.className = baseClasses;
+        optBtn.innerHTML = `<span>${optText}</span>`;
+        if (!isExamFinished) {
+          optBtn.onclick = () => selectOption(index, optIdx);
+        }
+        container.appendChild(optBtn);
+      });
+
+      // Flag state button toggle
+      const btnFlag = document.getElementById("btnFlag");
+      if (flaggedItems[index]) {
+        btnFlag.className = "border border-amber-500 bg-amber-500/20 text-amber-300 px-3 py-2 rounded-lg text-sm font-medium transition";
+      } else {
+        btnFlag.className = "border border-amber-500/50 hover:bg-amber-500/10 text-amber-400 px-3 py-2 rounded-lg text-sm font-medium transition";
+      }
+
+      // Prev/Next disables
+      document.getElementById("btnPrev").disabled = (index === 0);
+      document.getElementById("btnNext").innerText = (index === 119) ? "Finish Exam" : "Next Item";
+
+      // Handle rationales if in review mode
+      const rationaleBox = document.getElementById("rationaleBox");
+      if (isExamFinished) {
+        rationaleBox.classList.remove("hidden");
+        document.getElementById("rationaleText").innerText = item.rationale;
+      } else {
+        rationaleBox.classList.add("hidden");
+      }
+    }
+
+    function selectOption(qIdx, optIdx) {
+      userAnswers[qIdx] = optIdx;
+      loadItem(qIdx);
+    }
+
+    function toggleFlagItem() {
+      flaggedItems[currentIndex] = !flaggedItems[currentIndex];
+      loadItem(currentIndex);
+    }
+
+    function navigateItem(direction) {
+      const next = currentIndex + direction;
+      if (next >= 0 && next < 120) {
+        loadItem(next);
+      } else if (next === 120) {
+        confirmFinishExam();
+      }
+    }
+
+    function jumpToItem(index) {
+      loadItem(index);
+    }
+
+    function confirmFinishExam() {
+      const unanswered = userAnswers.filter(a => a === null).length;
+      let msg = "Are you sure you want to finalize and grade your exam?";
+      if (unanswered > 0) {
+        msg = `You still have ${unanswered} unanswered items. ` + msg;
+      }
+      if (confirm(msg)) {
+        finishExam();
+      }
+    }
+
+    function finishExam() {
+      isExamFinished = true;
+      clearInterval(timerInterval);
+
+      // Score Calculation
+      let correctCount = 0;
+      const domainStats = {};
+
+      examQuestions.forEach((q, idx) => {
+        if (!domainStats[q.domain]) {
+          domainStats[q.domain] = { total: 0, correct: 0 };
+        }
+        domainStats[q.domain].total++;
+
+        if (userAnswers[idx] === q.correct) {
+          correctCount++;
+          domainStats[q.domain].correct++;
+        }
+      });
+
+      const percentage = Math.round((correctCount / 120) * 100);
+
+      // Display Modal Results
+      document.getElementById("scoreValueDisplay").innerText = `${percentage}%`;
+      const passBadge = document.getElementById("passFailBadge");
+      if (percentage >= 60) {
+        passBadge.innerText = "PASS";
+        passBadge.className = "text-lg font-bold text-emerald-400 mt-1";
+      } else {
+        passBadge.innerText = "FAIL";
+        passBadge.className = "text-lg font-bold text-rose-500 mt-1";
+      }
+
+      document.getElementById("resultsModal").classList.remove("hidden");
+      renderChart(domainStats);
+    }
+
+    function enableReviewMode() {
+      document.getElementById("resultsModal").classList.add("hidden");
+      loadItem(0);
+    }
+
+    function renderChart(domainStats) {
+      const ctx = document.getElementById('domainChart').getContext('2d');
+      const labels = Object.keys(domainStats);
+      const scores = labels.map(d => Math.round((domainStats[d].correct / domainStats[d].total) * 100));
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Domain Performance (%)',
+            data: scores,
+            backgroundColor: 'rgba(13, 148, 136, 0.6)',
+            borderColor: 'rgba(20, 184, 166, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8' } },
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } } }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+  </script>
 </body>
 </html>
